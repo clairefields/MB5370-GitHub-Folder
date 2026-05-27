@@ -1,0 +1,220 @@
+---
+title: "Module One"
+author: "Claire Fields"
+date: "2026-05-20"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r workshop1}
+source("workshop1.R")
+```
+
+## Workshop 2: Data Visualisations
+
+# Install Packages
+```{r}
+library("tidyverse")
+```
+
+```{r graphing template}
+ggplot(data=<DATA>) +
+  <GEOM_FUNCTION>(mapping=aes(<XYMAPPINGS))
+# geom is how you represent your data
+#point, line, smooth
+#aes indicates the aesthetics, include x and y here
+#add colour = z to map z to colour (changes colour based on class)
+#alpha=transparency, colour, size, shape
+
+#updated at the end of workshop 2:
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <FACET_FUNCTION>
+```
+
+```{r practice plots}
+ggplot(data=mpg) +
+  geom_point(mapping=aes(x=displ, y=hwy, shape=colour))
+
+#a question to try out
+ggplot(data=mpg)+
+  geom_point(mapping=aes(x=displ,y=hwy, colour=displ<5))
+```
+
+```{r facet and panel plots}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ cyl)
+#facet_grid   separate variables by ~ if you only want one use a .
+#nrow is number of rows, ncol is number of columns
+```
+
+```{r lines}
+ggplot(data = mpg) + 
+  # geom_point(mapping=aes(x=displ,y=highway)) #points look bad
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+ ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, colour = drv), show.legend = FALSE)
+#can add group= to group the data but it doesnt add a legend,
+ 
+ ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+ #not ideal because it increase the chance of a mistype if you go to change things
+ 
+#instead:
+ ggplot(data = mpg, mapping=aes(x=displ,y=hwy)) + #makes mappings global to the plot
+  geom_point()+
+   geom_smooth()
+ # you can individually add aesthetics to each geom
+ 
+ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+ geom_
+ #filter means you are only showing subcompact cars on the line
+ 
+ #these should be the same
+ ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+#and they are!
+```
+
+```{r transformations}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+
+
+#override a default stat
+demo <- tribble(
+  ~cut,         ~freq,
+  "Fair",       1610,
+  "Good",       4906,
+  "Very Good",  12082,
+  "Premium",    13791,
+  "Ideal",      21551
+)
+demo
+
+ggplot(data = demo) +
+  geom_bar(mapping = aes(x = cut, y = freq), stat = "identity")
+
+#override into proportions
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = stat(prop), group = 1))
+
+#improve transparency by using stat_summary
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.min = min,
+    fun.max = max,
+    fun = median
+  )
+```
+
+```{r Aesthetic Adjustments}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut)) #colour just changes the outline
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut)) #fill actually fills in the shape
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity)) #breaks the cut into clarity
+
+#position adjustments: identity = raw data, fill = changes height, dodge = forces ggplot2 to not put things on top of eachother
+
+#change transparancy with alpha
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+
+#color outlines with no fill
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + 
+  geom_bar(fill = NA, position = "identity")
+
+
+#position fill means that you make all the stacks the same height, showing more of a percentage instead of actual count
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+# dodge moves them side by side
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+# jitter slightly move the points
+ggplot(data = diamonds) + 
+  geom_point(mapping = aes(x = cut, y = clarity), position = "jitter")
+```
+
+
+
+## Workshop 3: Building a tool box
+
+```{r FOR LOOPS}
+#for (value in that){
+ # this
+#}
+
+#this is telling r to print "one run" for every value in c
+for (value in c("My", "first", "for", "loop")){
+  print("one run")
+  }
+
+#this is telling r to print the value of each entry in c
+for (value in c("My", "second", "for", "loop")){
+  print(value)  #can change print to anything
+  }
+
+my_list<- 1:50 
+print(my_list)
+str(my_list)
+
+#make a for loop
+for(i in my_list){   #heading of the for loop
+  result <- i
+  out <- paste0("I am printing loop number: ", i, ".")
+  print(out)
+  Sys.sleep(0.5) #this slows it down for us to see
+}
+print("For loop complete!")
+print("Program complete")
+
+#more complex
+print("This for loop will add 500 to each iteration")
+add_me<-500
+for(i in my_list){
+  result<- i + add_me
+  out<- paste0("Result of iteration: ", i, "=", result, ".")
+              print(out)
+}
+print("Complete!")
+
+```
+
+```{r NESTED FOR LOOPS}
+for(i in c(1,2,3,4,5)){  #for every iteration in the list
+  print(paste("I am base loop number:", i))   #print this
+ # Sys.sleep(0.8)  #slows down
+
+  for(j in c(1,2,3)){     #for every iteration in c
+    print(paste("...I am inside loop number:",j))   #print this
+    #Sys.sleep(0.8)
+  }  # this closes the loop, if you move it up before the next loop then it wouldn't be nested and just one after another
+}    
+```
