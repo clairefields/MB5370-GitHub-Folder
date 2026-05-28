@@ -2,7 +2,9 @@
 title: "Module One"
 author: "Claire Fields"
 date: "2026-05-20"
-output: word_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -18,11 +20,12 @@ source("workshop1.R")
 # Install Packages
 ```{r}
 library("tidyverse")
+library("ggplot2")
 ```
 
 ```{r graphing template}
-ggplot(data=<DATA>) +
-  <GEOM_FUNCTION>(mapping=aes(<XYMAPPINGS))
+#ggplot(data=<DATA>) +
+  #<GEOM_FUNCTION>(mapping=aes(<XYMAPPINGS))
 # geom is how you represent your data
 #point, line, smooth
 #aes indicates the aesthetics, include x and y here
@@ -30,18 +33,18 @@ ggplot(data=<DATA>) +
 #alpha=transparency, colour, size, shape
 
 #updated at the end of workshop 2:
-ggplot(data = <DATA>) + 
-  <GEOM_FUNCTION>(
-     mapping = aes(<MAPPINGS>),
-     stat = <STAT>, 
-     position = <POSITION>
-  ) +
-  <FACET_FUNCTION>
+#ggplot(data = <DATA>) + 
+  #<GEOM_FUNCTION>(
+     #mapping = aes(<MAPPINGS>),
+     #stat = <STAT>, 
+     #position = <POSITION>
+ # ) +
+#  <FACET_FUNCTION>
 ```
 
 ```{r practice plots}
 ggplot(data=mpg) +
-  geom_point(mapping=aes(x=displ, y=hwy, shape=colour))
+  geom_point(mapping=aes(x=displ, y=hwy, shape=class))
 
 #a question to try out
 ggplot(data=mpg)+
@@ -83,7 +86,7 @@ ggplot(data = mpg) +
  ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
   geom_point(mapping = aes(color = class)) + 
   geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
- geom_
+
  #filter means you are only showing subcompact cars on the line
  
  #these should be the same
@@ -218,3 +221,134 @@ for(i in c(1,2,3,4,5)){  #for every iteration in the list
   }  # this closes the loop, if you move it up before the next loop then it wouldn't be nested and just one after another
 }    
 ```
+
+### Github Workflow
+
+Edit → Save → Stage → Commit → Pull → Push
+
+## Workshop 4: Developer's Toolbox and AI 
+
+```{r}
+library(ellmer)
+library(chattr)
+```
+
+```{r store api key}
+usethis::edit_r_environ()
+usethis::edit_r_profile()
+#have to save and restart r after each of these actions. stores them in the environment and profile instead of my actual code
+```
+
+```{r practicing chattr}
+# ctrl + o opens chat
+# prompt:show me the code to make a scatter plot showing the relationship between size and clarity of diamonds in the diamonds base data set 
+
+# Code:
+library(ggplot2)
+
+ggplot(data = diamonds, aes(x = carat, y = clarity)) +
+  geom_point()
+```
+
+```{r practicing inline copilot}
+#Load tidyverse and palmerpenguins libraries
+library(tidyverse)
+library(palmerpenguins)
+
+
+#Create a ggplot scatter plot using this penguins data
+#plot bill_len on the x axis and bill_dep on the y axis
+#color points by species and use geom_point with size 3
+#add a minimal theme and clean labels
+ggplot(data = penguins, aes(x = bill_len, y = bill_dep, color = species)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Bill Length vs Bill Depth of Penguins",
+       x = "Bill Length (mm)",
+       y = "Bill Depth (mm)",
+       color = "Species")
+
+
+```
+
+```{r}
+#option A
+# please create a boxplot that compares flipper length across different species, faceted by island, use custom color palettes
+ggplot(data = penguins, aes(x = species, y = flipper_len, fill = island)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Biscoe" = "lightblue", "Dream" = "lightgreen", "Torgersen" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Species",
+       y = "Flipper Length (mm)",
+       fill = "Island")
+
+# option b
+#generate a boxplot comparing flipper_len across different species, faceted by island, using custom color palettes. i would like the island names to be along the x axis and no labels for the species other than the fill
+ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
+  geom_boxplot() +
+  facet_wrap(~ species) +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Island",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+# option c
+ggplot(data = penguins, aes(x = species, y = flipper_len, fill = species)) +
+  geom_boxplot() +
+  facet_wrap(~ island) +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Species",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+# option d
+ggplot(data = penguins, aes(x = island, y = flipper_len, fill = species)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Adelie" = "lightblue", "Chinstrap" = "lightgreen", "Gentoo" = "lightpink")) +
+  theme_minimal() +
+  labs(title = "Flipper Length Comparison Across Penguin Species",
+       x = "Island",
+       y = "Flipper Length (mm)",
+       fill = "Species")
+```
+
+I tried a couple different plots using different levels of copilot to help me out. I think option D is the best, even though it is not technically faceted. I think it is more visually appealing and easier to read than the other options. 
+# 4.3 Conditional Logic
+The classic base R conditional structure screens a single value at a time. Its basic anatomy uses round brackets () for the logical condition and curly braces {} for the action if that condition is true. Base r basic conditional logic only works for one value, can't use vectors.
+```{r practice}
+# Simple Example: Checking Sea Surface Temperature (SST)
+sst <- 30.2
+
+if (sst > 29.5) {
+  print("Warning: Marine heatwave threshold exceeded!")
+} else {
+  print("SST remains within baseline parameters.")
+}
+```
+
+Use tidyverse to evaluate columns
+```{r}
+# Sample coral data
+coral_monitoring <- tibble(
+  site= c("A", "B", "c"),
+  depth_m = c(12, 35, 8)
+  )
+
+#classify depth using if_else
+#coral_monitoring <- 
+  coral_monitoring %>%
+  mutate(zone=if_else(depth_m>30,"Deep Reef", "Shallow Reef"))
+
+# mutate: add a new column
+# %>%: pipe one variable/object to a function
+
+
+
+
+```
+
+
+
